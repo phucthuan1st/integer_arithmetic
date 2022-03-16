@@ -1,10 +1,13 @@
 # Integer Arithmetic
-Binary integer operation simulation with C++/C
+Binary integer operation simulation with C/C++
 
 Hi all!
 
 I conplete thís project in 2 days, so the code will not too clean in some way, but it run ok
+Note: the program simulate 8-bit integer, so if you want it to work with more-bit integer, just change the num_bits in define in header and change the constructor like below\
+```C++
 
+```
 # Describe
 * First for the add operation (as + operator): I used the plus as human thinking by if clause (8 case at all)
 * For the subtract operation (as - operator): I used the logic about adding the two's complement of the subtractor
