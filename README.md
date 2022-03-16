@@ -16,3 +16,27 @@ The division algorithm is divided into two steps:
 1. Shift the upper bits of the dividend (the number we are dividing into) into the remainder.
 2. Subtract the divisor from the value in the remainder. The high order bit of the result become a bit of the quotient (division result).
 Sources: http://bearcave.com/software/divide.htm#:~:text=The%20division%20algorithm%20is%20divided,the%20quotient%20(division%20result).
+
+``C++
+    Integer result(0);
+    char bit_pos = 0;
+    Integer remainder = dividend.right_shift(num_bits - 1);
+
+    while (bit_pos < num_bits) {
+        Integer quotient = remainder - divisor;
+        
+        result = result.left_shift(1);
+        bit_pos++;
+
+        if (quotient.bitset[0] == '1') {
+            result.bitset[num_bits - 1] = '0';
+            remainder = remainder.left_shift(1);
+        }
+        else {
+            result.bitset[num_bits - 1] = '1';
+            remainder = quotient.left_shift(1);
+        }
+
+        remainder.bitset[num_bits - 1] = dividend.bitset[bit_pos];
+    }
+    ``
