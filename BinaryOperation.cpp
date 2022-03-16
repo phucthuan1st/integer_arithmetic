@@ -1,19 +1,42 @@
 #include "BinaryOperation.h"
+#include <string.h>
 
 //constructor with input a char array
+//Integer::Integer(const char* bitset) {
+//    this->bitset = new char[num_bits + 1];
+//    for (char i = 0; i < num_bits; i++) {
+//        this->bitset[i] = bitset[i];
+//    }
+//    this->bitset[num_bits] = '\0';
+//}
+
 Integer::Integer(const char* bitset) {
     this->bitset = new char[num_bits + 1];
-    for (char i = 0; i < num_bits; i++) {
-        this->bitset[i] = bitset[i];
-    }
     this->bitset[num_bits] = '\0';
+
+    char len = strlen(bitset);
+
+    if (len < num_bits) {
+        for (unsigned char i = 0; i < len; i++) {
+            this->bitset[i] = '0';
+        }
+        for (unsigned char i = len; i < num_bits; i++) {
+            this->bitset[i] = bitset[i];
+        }
+    }
+    else {
+        for (unsigned char i = 0; i < num_bits; i++) {
+            this->bitset[i] = bitset[i];
+        }
+    }
 }
 
 //constructor with input a int number
 Integer::Integer(int number) {
     this->bitset = new char[num_bits + 1];
+    this->bitset[num_bits] = '\0';
 
-    for (char i = 7; i >= 0; i--) {
+    for (char i = num_bits - 1; i >= 0; i--) {
         
         if (number & 0x0001) 
             bitset[i] = '1';
@@ -23,7 +46,6 @@ Integer::Integer(int number) {
         number >>= 1;
     }
 
-    this->bitset[num_bits] = '\0';
 }
 
 //convert to decimal using OR ( | )
@@ -122,8 +144,8 @@ Integer operator + (const Integer& first, const Integer& second) {
 //return the two complement of a number (negative number)
 Integer Integer::two_complement() {
 
-    char* one_complement = new char[num_bits];
-        for (char i = 0; i < num_bits; i++) {
+    char* one_complement = new char[num_bits + 1];
+    for (char i = 0; i < num_bits; i++) {
         if (this->bitset[i] == '1') {
             one_complement[i] = '0';
         }
@@ -132,7 +154,9 @@ Integer Integer::two_complement() {
         }
     }
 
-    return one_complement + Integer("00000001");
+    one_complement[num_bits] = '\0';
+
+    return Integer(one_complement) + Integer("00000001");
 }
 
 //add function with overload the - operator (can use - operator as normal number)
@@ -161,17 +185,26 @@ Integer Integer::left_shift(char bit_to_shift) {
 }
 
 //add function with overload the * operator (can use * operator as normal number)
-Integer operator * (const Integer& first, Integer& second) {
+Integer operator * (Integer& first, Integer& second) {
     Integer result("00000000");
+    
+    bool isNegative = false;
+    if (first.bitset[0] != second.bitset[0])
+        isNegative = true;
+
+    Integer first_num = (first.bitset[0] == '0') ? first : first.two_complement();
+    Integer second_num = (second.bitset[0] == '0') ? second : second.two_complement();
+
     for (char i = 7; i >= 0; i--) {
         
-        if (first.bitset[i] == '1') {
-            Integer temp = second.left_shift(num_bits - i - 1);
+        if (first_num.bitset[i] == '1') {
+            Integer temp = second_num.left_shift(num_bits - i - 1);
             result = result + temp;
         }
     }
 
-    return result;
+    if (isNegative) return result.two_complement();
+    else return result;
 }
 
 //return the number when shift x bit to the right
@@ -189,12 +222,19 @@ Integer Integer::right_shift(char bit_to_shift) {
 }
 
 //add function with overload the / operator (can use / operator as normal number)
-Integer operator / (Integer& dividend, Integer& divisor) {
+Integer operator / (Integer& dvend, Integer& dvsor) {
 
     Integer result(0);
-    char bit_pos = 0;
+    bool isNegative = false;
+    if (dvend.bitset[0] != dvsor.bitset[0])
+        isNegative = true;
+
+    Integer dividend = (dvend.bitset[0] == '0') ? dvend : dvend.two_complement();
+    Integer divisor = (dvsor.bitset[0] == '0') ? dvsor : dvsor.two_complement();
+
     Integer remainder = dividend.right_shift(num_bits - 1);
 
+    char bit_pos = 0;
     while (bit_pos < num_bits) {
         Integer quotient = remainder - divisor;
         
@@ -213,7 +253,33 @@ Integer operator / (Integer& dividend, Integer& divisor) {
         remainder.bitset[num_bits - 1] = dividend.bitset[bit_pos];
     }
 
-    return result;
+    if (isNegative) return result.two_complement();
+    else return result;
+}
+
+Integer operator % (Integer& dvend, Integer& dvsor) {
+
+    Integer dividend = (dvend.bitset[0] == '0') ? dvend : dvend.two_complement();
+    Integer divisor = (dvsor.bitset[0] == '0') ? dvsor : dvsor.two_complement();
+
+    Integer remainder = dividend.right_shift(num_bits - 1);
+
+    char bit_pos = 0;
+    while (bit_pos < num_bits) {
+        Integer quotient = remainder - divisor;
+        bit_pos++;
+
+        if (quotient.bitset[0] == '1') {
+            remainder = remainder.left_shift(1);
+        }
+        else {
+            remainder = quotient.left_shift(1);
+        }
+
+        remainder.bitset[num_bits - 1] = dividend.bitset[bit_pos];
+    }
+
+    return remainder.right_shift(1);
 }
 
 /* 

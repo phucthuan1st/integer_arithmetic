@@ -2,6 +2,7 @@
 
 using namespace std;
 
+//change the num_bits to 16, 32, or 64 if you want to work with more-bit integer
 #define num_bits 8
 
 class Integer {
@@ -28,6 +29,8 @@ class Integer {
     public: //operator overload
         friend Integer operator + (const Integer&, const Integer&);
         friend Integer operator - (const Integer&, Integer&);
-        friend Integer operator * (const Integer&, Integer&);
+        friend Integer operator * (Integer&, Integer&);
         friend Integer operator / (Integer&, Integer&);
+        friend Integer operator % (Integer&, Integer&);
 };
+
